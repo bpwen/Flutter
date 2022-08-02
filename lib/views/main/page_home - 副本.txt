@@ -1,0 +1,237 @@
+// ignore_for_file: use_key_in_widget_constructors, camel_case_types, prefer_const_constructors, unused_import, import_of_legacy_library_into_null_safe, constant_identifier_names
+/*
+ * @Name: 首页
+ * @Author: bpwen.cn
+ * @Date: 2022-01-10 09:39:23
+ * @LastEditors: VSCode
+ * @LastEditTime: 2022-01-22 16:14:58
+ */
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '/components/config.dart';
+
+import './components/PopularCommunity.dart';
+import './components/EveryoneIsTalking.dart';
+import './components/QAarea.dart';
+
+
+class Home extends StatefulWidget {
+    @override
+    _Home createState() => _Home();
+}
+
+class _Home extends State<Home>
+    with SingleTickerProviderStateMixin {
+
+    //滚动的控制器
+    late ScrollController _scrollController;
+
+    // 选项卡控制器
+    late TabController _tabController;
+
+    //  初始化滑动器
+    @override
+    final _tabs = <String>['大家都在聊', '问答专区', '推荐课程', '严选好物'];
+    int tabBarIndex = 0;
+    void initState() {
+        // TODO: implement initState
+        super.initState();
+        _scrollController = ScrollController(initialScrollOffset: 0.0);
+        _tabController = TabController(length: _tabs.length, vsync: this);
+
+        _tabController.addListener(() {
+            tabBarIndex = _tabController.index;
+            setState(() {});
+        });
+    }
+
+    @override
+    void dispose() {
+        super.dispose();
+        _scrollController.dispose();
+        _tabController.dispose();
+    }
+
+    static const MaterialColor ColorsBaishe = MaterialColor(
+        _ColorsBaishePrimaryValue,
+        <int, Color>{
+            50: Color(0xFFFFFFFF),
+            100: Color(0xFFFFFFFF),
+            200: Color(0xFFFFFFFF),
+            300: Color(0xFFFFFFFF),
+            400: Color(0xFFFFFFFF),
+            500: Color(_ColorsBaishePrimaryValue),
+            600: Color(0xFFFFFFFF),
+            700: Color(0xFFFFFFFF),
+            800: Color(0xFFFFFFFF),
+            900: Color(0xFFFFFFFF),
+        },
+    );
+    static const int _ColorsBaishePrimaryValue = 0xFFFFFFFF;
+
+    var ContainerSpacing = EdgeInsets.only(right: 15.0, left: 15.0);
+
+    @override
+    Widget build(BuildContext context) {
+        ScreenUtil.init(context, designSize: Size(Global.windows_w, Global.windows_h), allowFontScaling: true);
+        return Theme(
+            data: ThemeData(
+                primaryColor: Colors.white,
+                primarySwatch: ColorsBaishe,
+                ///点击的背景高亮颜色,处理阴影
+                highlightColor: Colors.transparent,
+                ///点击水波纹颜色
+                splashColor: Colors.transparent,
+            ),
+            child: Scaffold(
+                //appBar: AppBar(
+                //    elevation: 1.0,
+                //    centerTitle: true,
+                //    title: Text('首页',style: TextStyle(fontSize: 24.0,color: Colors.white),),
+                //),
+                body: NestedScrollView(
+                    controller: _scrollController,
+                    headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                        return <Widget>[
+                            SliverAppBar(
+                                //吸顶
+                                pinned: true,
+                                floating: true,
+                                expandedHeight: 650.h,
+                                flexibleSpace: FlexibleSpaceBar(
+                                    collapseMode: CollapseMode.pin,
+                                    background: Container(
+                                        height: double.infinity,
+                                        color: Global.backgroundColor,
+                                        child: Column(
+                                            children: <Widget>[
+                                                Container(
+                                                    width: 375.w,
+                                                    height: 259.h,
+                                                    child:  Stack(
+                                                        children: <Widget>[
+                                                            SizedBox(
+                                                                width: 375.w,
+                                                                height: 236.h,
+                                                                //child:  Bpw_rotation_chart(),
+                                                            ),
+                                                            Positioned(
+                                                                top: 213.h,
+                                                                child: Bpw_searchA(),
+                                                            ),
+                                                        ]
+                                                    ),
+                                                ),
+                                                Container(
+                                                    padding: ContainerSpacing,
+                                                    child: Column(
+                                                        children: <Widget>[
+                                                            Bpw_list_GridView_builder(
+                                                                data: nevIcon,
+                                                                height: 190.h,
+                                                                crossAxisCount: 4,
+                                                                dataImgUrl: "Icon",
+                                                                imgWidth: 51.w,
+                                                                imgHeight: 51.h,
+                                                                fontSize: 13.sp,
+                                                                paddingTop: 15.h,
+                                                                paddingLeft: 5.w,
+                                                                paddingRight: 5.w,
+                                                                mainAxisSpacing: 5.w,
+                                                                crossAxisSpacing: 5.w,
+                                                            ),
+                                                            Bpw_Title(title: "热门社群",titleSize: 18.sp),
+                                                        ]
+                                                    )
+                                                ),
+                                                PopularCommunity(),
+                                            ],
+                                        ),
+                                    ),
+                                ),
+                                bottom:PreferredSize(
+                                    preferredSize: Size(double.infinity, 50.h),//设置高度为30
+                                    child: Container(
+                                        alignment: Alignment.centerLeft,
+                                        //padding: EdgeInsets.only(right: 15.w, bottom: 15.h, left: 15.w),
+                                        padding: EdgeInsets.only(right: 10.w, left: 7.w, bottom: 8.h),
+                                        child: TabBar(
+                                            controller: _tabController,
+                                            tabs: _tabs.map((String name) => Stack(
+                                                children: <Widget>[
+                                                    Container(
+                                                        padding: EdgeInsets.only(right: 10.w, bottom: 3.h),
+                                                        child: Text(name)
+                                                    ),
+                                                    tabBarIndex == _tabs.indexOf(name) ? Positioned(
+                                                        right: 2.0,
+                                                        bottom: 0.0,
+                                                        child: Image.asset(
+                                                            "images/iocn/home_tab.png",
+                                                            fit: BoxFit.cover,
+                                                            width: 12.w,
+                                                            height: 12.w,
+                                                        ),
+                                                    ) : Text(""),
+                                                ]
+                                            )).toList(),
+                                            isScrollable: true,
+                                            indicatorSize: TabBarIndicatorSize.label, //选中下划线的长度，label时跟文字内容长度一样，tab时跟一个Tab的长度一样
+                                            indicator: const BoxDecoration(),//去掉下划线
+                                            labelPadding: EdgeInsets.only(left: 10),
+                                            labelColor: Colors.black, //设置选中时的字体颜色，tabs里面的字体样式优先级最高
+                                            labelStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold), //设置选中时的字体样式，tabs里面的字体样式优先级最高
+                                            unselectedLabelColor: Colors.black, //设置未选中时的字体颜色，tabs里面的字体样式优先级最高
+                                            unselectedLabelStyle: TextStyle(fontSize: 15.sp), //设置未选中时的字体样式，tabs里面的字体样式优先级最高
+                                        ),
+                                    )
+                                )
+                            )
+                        ];
+                    },
+                    body: TabBarView(
+                        controller: _tabController,
+                        children: <Widget>[
+                            EveryoneIsTalking(),
+                            QAarea(),
+                            Container(
+                                height: 35.0,
+                                alignment: Alignment.centerLeft,
+                                color: Colors.white,
+                                child: _buildListView("瓷器:")
+                            ),
+                            Container(
+                                height: 35.0,
+                                alignment: Alignment.centerLeft,
+                                color: Colors.white,
+                                child: _buildListView("收藏:")
+                            )
+                        ],
+                    ),
+                ),
+            ),
+        );
+    }
+
+    Widget _buildListView(String s) {
+        return ListView.separated(
+            itemCount: 20,
+            separatorBuilder: (BuildContext context, int index) =>
+                Divider(
+                    //color: Colors.grey,
+                    height: 1,
+                ),
+            itemBuilder: (BuildContext context, int index) {
+                return Container(
+                    //color: Colors.white,
+                    child: ListTile(title: Text("$s第$index 个条目"))
+                );
+            }
+        );
+    }
+}
+
+
